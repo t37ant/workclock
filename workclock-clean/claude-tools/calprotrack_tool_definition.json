@@ -1,0 +1,34 @@
+{
+  "name": "calprotrack_business",
+  "description": "Access real-time data from your CalProTrack time tracking business. Get info about active employees, payroll, hours worked, and job site activity.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": [
+          "get_active_employees",
+          "get_payroll",
+          "get_employee_hours",
+          "get_busy_sites",
+          "get_today_summary"
+        ],
+        "description": "The action to perform"
+      },
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "integer",
+            "description": "Number of days to look back (for payroll and employee hours)"
+          },
+          "employee_id": {
+            "type": "integer",
+            "description": "Employee ID (for get_employee_hours)"
+          }
+        }
+      }
+    },
+    "required": ["action"]
+  }
+}

@@ -1,0 +1,9 @@
+// 2. tool_definition.json - Tell Claude about your tool
+{
+  "name": "task_manage",
+  "description": "Create and list tasks",
+  "parameters": {
+    "action": {"type": "string"},
+    "title": {"type": "string"}
+  }
+}

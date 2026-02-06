@@ -1,0 +1,535 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CalProTrack - Web Portal</title>
+  <link rel="stylesheet" href="portal.css" />
+  <!-- Export libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="light-mode">
+  <!-- Login Screen -->
+  <div id="loginScreen" class="screen active">
+    <div class="login-container">
+      <div class="login-box">
+        <div class="login-logo">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="loginGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="35" fill="none" stroke="url(#loginGrad)" stroke-width="4"/>
+            <line x1="50" y1="50" x2="50" y2="25" stroke="url(#loginGrad)" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="4" fill="url(#loginGrad)"/>
+          </svg>
+          <h1>CalProTrack</h1>
+          <p>Web Portal</p>
+        </div>
+        <form id="loginForm">
+          <input id="loginCompany" type="text" placeholder="Company Name" required />
+          <input id="loginEmail" type="email" placeholder="Email" required />
+          <input id="loginPassword" type="password" placeholder="Password" required />
+          <p id="loginError" class="error-text"></p>
+          <button type="submit">Sign In</button>
+          <p class="hint">Use mobile app for clock in/out</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Portal Dashboard -->
+  <div id="portalScreen" class="screen">
+    <!-- Header -->
+    <header class="portal-header">
+      <div class="header-left">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="logo-small">
+          <defs>
+            <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="35" fill="none" stroke="url(#headerGrad)" stroke-width="4"/>
+          <line x1="50" y1="50" x2="50" y2="25" stroke="url(#headerGrad)" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="4" fill="url(#headerGrad)"/>
+        </svg>
+        <span class="logo-text">CalProTrack</span>
+      </div>
+      <div class="header-right">
+        <button id="themeToggle" class="icon-btn">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+          </svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <div class="user-info">
+          <span id="userName">User</span>
+          <span id="userRole" class="role-badge">Employee</span>
+        </div>
+        <button id="logoutBtn" class="icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tabs Navigation -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="overview">Overview</button>
+      <button class="tab-btn" data-tab="hours">Hours</button>
+      <button class="tab-btn" data-tab="pay">Pay</button>
+      <button class="tab-btn admin-only" data-tab="insights" style="display:none">📊 Insights</button>
+      <button class="tab-btn admin-only" data-tab="team" style="display:none">Team</button>
+      <button class="tab-btn admin-only" data-tab="sites" style="display:none">Sites</button>
+      <button class="tab-btn admin-only" data-tab="reports" style="display:none">Reports</button>
+    </nav>
+
+    <!-- Tab Content -->
+    <div class="tab-container">
+      <!-- Overview Tab -->
+      <div id="overviewTab" class="tab-pane active">
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-info">
+              <div class="stat-value" id="weekHours">0.0</div>
+              <div class="stat-label">Hours This Week</div>
+            </div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">💰</div>
+            <div class="stat-info">
+              <div class="stat-value" id="weekPay">$0</div>
+              <div class="stat-label">Week Earnings</div>
+            </div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-icon">📊</div>
+            <div class="stat-info">
+              <div class="stat-value" id="monthHours">0.0</div>
+              <div class="stat-label">Hours This Month</div>
+            </div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">💵</div>
+            <div class="stat-info">
+              <div class="stat-value" id="monthPay">$0</div>
+              <div class="stat-label">Month Earnings</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-row">
+          <!-- Recent Activity -->
+          <div class="panel">
+            <h3>Today's Activity</h3>
+            <div id="recentActivity" class="activity-list"></div>
+          </div>
+
+          <!-- Admin: Company Stats + Active Now -->
+          <div class="panel admin-only" id="adminQuickInfo" style="display:none">
+            <h3>Company Overview</h3>
+            <div class="quick-stats" style="flex-shrink:0">
+              <div class="quick-stat">
+                <span>Active Employees</span>
+                <strong id="totalEmployees">0</strong>
+              </div>
+              <div class="quick-stat">
+                <span>Job Sites</span>
+                <strong id="totalSites">0</strong>
+              </div>
+              <div class="quick-stat" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2)">
+                <span style="color:var(--green);font-weight:600">🟢 Clocked In Now</span>
+                <strong id="currentlyActive" style="color:var(--green);font-size:20px">0</strong>
+              </div>
+            </div>
+            <h3 style="margin-top:12px">Who's Working Now</h3>
+            <div id="activeEmployeesList" class="activity-list">
+              <div style="color:var(--text-tertiary);text-align:center;padding:12px">Loading...</div>
+            </div>
+          </div>
+
+          <!-- Employee: Quick Pay Info (shown when NOT admin) -->
+          <div class="panel employee-only" id="employeeQuickInfo">
+            <h3>Quick Pay Info</h3>
+            <div class="quick-stats">
+              <div class="quick-stat">
+                <span>Hourly Rate</span>
+                <strong id="overviewRate">$0.00</strong>
+              </div>
+              <div class="quick-stat" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2)">
+                <span style="font-weight:600">Est. Weekly Gross</span>
+                <strong id="overviewWeekGross" style="color:var(--green)">$0.00</strong>
+              </div>
+              <div class="quick-stat">
+                <span>Est. Monthly Gross</span>
+                <strong id="overviewMonthGross">$0.00</strong>
+              </div>
+            </div>
+            <p style="font-size:12px;color:var(--text-tertiary);margin-top:auto;text-align:center">View the Pay tab for detailed breakdown</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hours Tab -->
+      <div id="hoursTab" class="tab-pane">
+        <div class="toolbar">
+          <div class="date-filter">
+            <input type="date" id="hoursStart" />
+            <span>to</span>
+            <input type="date" id="hoursEnd" />
+            <button id="loadHours" class="btn-secondary">Load</button>
+          </div>
+          <div class="export-group">
+            <button id="exportHoursExcel" class="btn-export">📊 Excel</button>
+            <button id="exportHoursPDF" class="btn-export">📄 PDF</button>
+            <button id="exportHoursCSV" class="btn-export">📋 CSV</button>
+          </div>
+        </div>
+
+        <div class="panel table-panel">
+          <div class="panel-header">
+            <h3>Time Entries</h3>
+            <div class="total-badge">Total: <strong id="hoursTotal">0.0 hrs</strong></div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Job Site</th>
+                  <th>Clock In</th>
+                  <th>Clock Out</th>
+                  <th>Hours</th>
+                </tr>
+              </thead>
+              <tbody id="hoursTableBody">
+                <tr><td colspan="5" class="empty">Select dates and click Load</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pay Tab -->
+      <div id="payTab" class="tab-pane">
+        <div class="toolbar">
+          <div class="date-filter">
+            <input type="date" id="payStart" />
+            <span>to</span>
+            <input type="date" id="payEnd" />
+            <button id="loadPay" class="btn-secondary">Load</button>
+          </div>
+          <div class="export-group">
+            <button id="exportPayExcel" class="btn-export">📊 Excel</button>
+            <button id="exportPayPDF" class="btn-export">📄 PDF</button>
+          </div>
+        </div>
+
+        <div class="content-row">
+          <div class="panel pay-summary">
+            <h3>Pay Summary</h3>
+            <div class="pay-breakdown">
+              <div class="pay-row">
+                <span>Total Hours</span>
+                <strong id="payHours">0.0 hrs</strong>
+              </div>
+              <div class="pay-row">
+                <span>Hourly Rate</span>
+                <strong id="payRate">$0.00/hr</strong>
+              </div>
+              <div class="pay-row highlight">
+                <span>Gross Pay</span>
+                <strong id="payGross">$0.00</strong>
+              </div>
+              <div class="pay-row">
+                <span>Est. Taxes (22%)</span>
+                <strong class="negative" id="payTax">-$0.00</strong>
+              </div>
+              <div class="pay-row total">
+                <span>Net Pay</span>
+                <strong id="payNet">$0.00</strong>
+              </div>
+            </div>
+            <p class="disclaimer">*Tax estimates are approximate</p>
+          </div>
+
+          <div class="panel">
+            <h3>By Job Site</h3>
+            <div class="table-wrapper">
+              <table class="data-table small">
+                <thead>
+                  <tr>
+                    <th>Site</th>
+                    <th>Hours</th>
+                    <th>Earnings</th>
+                  </tr>
+                </thead>
+                <tbody id="paySiteBody">
+                  <tr><td colspan="3" class="empty">No data</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insights Tab (Admin) -->
+      <div id="insightsTab" class="tab-pane">
+        <div class="toolbar">
+          <h2 style="margin:0;font-size:20px">📊 Business Insights Dashboard</h2>
+          <button id="refreshInsights" class="btn-secondary">🔄 Refresh</button>
+        </div>
+
+        <!-- Today's Summary Cards -->
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+              <div class="stat-value" id="insightsTodayHours">0.0</div>
+              <div class="stat-label">Hours Today</div>
+            </div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">💰</div>
+            <div class="stat-info">
+              <div class="stat-value" id="insightsTodayPay">$0</div>
+              <div class="stat-label">Labor Cost Today</div>
+            </div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <div class="stat-value" id="insightsActiveNow">0</div>
+              <div class="stat-label">Currently Working</div>
+            </div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">📊</div>
+            <div class="stat-info">
+              <div class="stat-value" id="insightsWeeklyPay">$0</div>
+              <div class="stat-label">Weekly Payroll</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-row">
+          <!-- Active Employees -->
+          <div class="panel">
+            <h3>🟢 Working Right Now</h3>
+            <div id="insightsActiveList" class="activity-list">
+              <div style="color:var(--text-tertiary);text-align:center;padding:12px">Loading...</div>
+            </div>
+          </div>
+
+          <!-- Site Activity -->
+          <div class="panel">
+            <h3>📍 Site Activity</h3>
+            <div id="insightsSiteActivity" class="activity-list">
+              <div style="color:var(--text-tertiary);text-align:center;padding:12px">Loading...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payroll Breakdown -->
+        <div class="panel">
+          <h3>💵 This Week's Payroll Breakdown</h3>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Hours</th>
+                  <th>Rate</th>
+                  <th>Total Pay</th>
+                </tr>
+              </thead>
+              <tbody id="insightsPayrollBody">
+                <tr><td colspan="4" class="empty">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Tab (Admin) -->
+      <div id="teamTab" class="tab-pane">
+        <div class="toolbar">
+          <input type="search" id="teamSearch" placeholder="Search employees..." />
+          <button id="addEmployee" class="btn-primary">+ Add Employee</button>
+        </div>
+
+        <div class="panel table-panel">
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Rate</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="teamTableBody">
+                <tr><td colspan="5" class="empty">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sites Tab (Admin) -->
+      <div id="sitesTab" class="tab-pane">
+        <div class="toolbar">
+          <input type="search" id="sitesSearch" placeholder="Search sites..." />
+          <button id="addSite" class="btn-primary">+ Add Site</button>
+        </div>
+
+        <div class="panel table-panel">
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Site Name</th>
+                  <th>Address</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="sitesTableBody">
+                <tr><td colspan="3" class="empty">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports Tab (Admin) -->
+      <div id="reportsTab" class="tab-pane">
+        <div class="toolbar">
+          <div class="date-filter">
+            <input type="date" id="reportStart" />
+            <span>to</span>
+            <input type="date" id="reportEnd" />
+            <button id="generateReport" class="btn-secondary">Generate</button>
+          </div>
+          <div class="export-group">
+            <button id="exportReportExcel" class="btn-export">📊 Excel</button>
+            <button id="exportReportPDF" class="btn-export">📄 PDF</button>
+          </div>
+        </div>
+
+        <div class="panel table-panel">
+          <div class="panel-header">
+            <h3>Payroll Report</h3>
+            <div class="total-badge">
+              Total Hours: <strong id="reportTotalHours">0</strong> | 
+              Total Payroll: <strong id="reportTotalPay">$0</strong>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Hours</th>
+                  <th>Rate</th>
+                  <th>Gross</th>
+                  <th>Tax</th>
+                  <th>Net</th>
+                </tr>
+              </thead>
+              <tbody id="reportTableBody">
+                <tr><td colspan="6" class="empty">Generate report to see data</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MODALS ========== -->
+
+  <!-- Employee Modal -->
+  <div id="employeeModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="employeeModalTitle">Add Employee</h3>
+        <button class="modal-close" onclick="hideModal('employeeModal')">&times;</button>
+      </div>
+      <form id="employeeForm">
+        <input type="hidden" id="employeeId" />
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="employeeName" placeholder="John Smith" required />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="employeeEmail" placeholder="john@company.com" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="employeePassword" placeholder="Minimum 6 characters" minlength="6" required />
+          <small id="employeePasswordHint" style="display:none;color:var(--text-tertiary)">Leave blank to keep current password</small>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:1">
+            <label>Hourly Rate ($)</label>
+            <input type="number" id="employeeRate" placeholder="25.00" step="0.01" min="0" value="0" />
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>Role</label>
+            <select id="employeeRole">
+              <option value="employee">Employee</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="hideModal('employeeModal')">Cancel</button>
+          <button type="submit" class="btn-primary">Save Employee</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Site Modal -->
+  <div id="siteModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="siteModalTitle">Add Job Site</h3>
+        <button class="modal-close" onclick="hideModal('siteModal')">&times;</button>
+      </div>
+      <form id="siteForm">
+        <input type="hidden" id="siteId" />
+        <div class="form-group">
+          <label>Site Name</label>
+          <input type="text" id="siteName" placeholder="Downtown Site A" required />
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" id="siteAddress" placeholder="123 Main St, City, CA" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="hideModal('siteModal')">Cancel</button>
+          <button type="submit" class="btn-primary">Save Site</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="portal.js"></script>
+</body>
+</html>
