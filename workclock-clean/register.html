@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Create Account - CalProTrack</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#667eea" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+</head>
+<body class="light-mode">
+  <div class="app-container">
+    
+    <!-- REGISTER SCREEN -->
+    <div id="registerScreen" class="screen active">
+      <div class="login-card">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="logoGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                </linearGradient>
+              </defs>
+              <circle cx="50" cy="50" r="40" fill="url(#logoGrad2)" opacity="0.15"/>
+              <circle cx="50" cy="50" r="35" fill="none" stroke="url(#logoGrad2)" stroke-width="4"/>
+              <line x1="50" y1="50" x2="50" y2="25" stroke="url(#logoGrad2)" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="50" cy="50" r="4" fill="url(#logoGrad2)"/>
+            </svg>
+          </div>
+          <h1>Create Account</h1>
+          <p class="tagline">Set up your company</p>
+        </div>
+
+        <form id="registerForm">
+          <div class="input-group">
+            <label>Company Name</label>
+            <input id="regCompanyName" type="text" placeholder="Your Company LLC" required />
+          </div>
+
+          <div class="input-group">
+            <label>Your Full Name</label>
+            <input id="regAdminName" type="text" placeholder="John Smith" required />
+          </div>
+
+          <div class="input-group">
+            <label>Email</label>
+            <input id="regAdminEmail" type="email" placeholder="you@company.com" required />
+          </div>
+
+          <div class="input-group">
+            <label>Password</label>
+            <input id="regAdminPassword" type="password" placeholder="Min 6 characters" required minlength="6" />
+          </div>
+
+          <p id="registerErr" class="error-msg"></p>
+
+          <button type="submit" class="btn-primary btn-large">Create Account</button>
+          
+          <div class="login-links">
+            <a href="login.html" class="btn-link">Back to Login</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Register form handler
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const companyName = document.getElementById('regCompanyName').value.trim();
+      const adminName = document.getElementById('regAdminName').value.trim();
+      const adminEmail = document.getElementById('regAdminEmail').value.trim();
+      const adminPassword = document.getElementById('regAdminPassword').value;
+      const errorEl = document.getElementById('registerErr');
+      
+      errorEl.textContent = '';
+      
+      if (adminPassword.length < 6) {
+        errorEl.textContent = 'Password must be at least 6 characters';
+        return;
+      }
+      
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ companyName, adminName, adminEmail, adminPassword })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          errorEl.textContent = data.error || 'Registration failed';
+          return;
+        }
+        
+        // Success - redirect to app
+        window.location.href = 'app.html';
+        
+      } catch (err) {
+        errorEl.textContent = 'Network error. Please try again.';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Login - CalProTrack</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#667eea" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+</head>
+<body class="light-mode">
+  <div class="app-container">
+    
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="screen active">
+      <div class="login-card">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                </linearGradient>
+              </defs>
+              <circle cx="50" cy="50" r="40" fill="url(#logoGrad)" opacity="0.15"/>
+              <circle cx="50" cy="50" r="35" fill="none" stroke="url(#logoGrad)" stroke-width="4"/>
+              <line x1="50" y1="50" x2="50" y2="25" stroke="url(#logoGrad)" stroke-width="4" stroke-linecap="round"/>
+              <line x1="50" y1="50" x2="65" y2="50" stroke="url(#logoGrad)" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="50" cy="50" r="4" fill="url(#logoGrad)"/>
+              <rect x="62" y="62" width="28" height="28" rx="4" fill="url(#logoGrad)"/>
+              <line x1="66" y1="67" x2="86" y2="67" stroke="white" stroke-width="1.5"/>
+              <line x1="68" y1="74" x2="78" y2="74" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="68" y1="80" x2="84" y2="80" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h1>CalProTrack</h1>
+          <p class="tagline">California Professional Time Tracking</p>
+        </div>
+
+        <form id="loginForm">
+          <div class="input-group">
+            <label>Company Name</label>
+            <input id="companyName" type="text" placeholder="J&H Transportation" autocomplete="organization" required />
+          </div>
+
+          <div class="input-group">
+            <label>Email</label>
+            <input id="email" type="email" placeholder="you@company.com" autocomplete="email" required />
+          </div>
+
+          <div class="input-group">
+            <label>Password</label>
+            <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+          </div>
+
+          <p id="loginErr" class="error-msg"></p>
+
+          <button type="submit" class="btn-primary btn-large">Sign In</button>
+          
+          <p class="hint">Demo: admin@jh.test / admin1234</p>
+          
+          <div class="login-links">
+            <a href="register.html" class="btn-link">Create New Company Account</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Login form handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const companyName = document.getElementById('companyName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errorEl = document.getElementById('loginErr');
+      
+      errorEl.textContent = '';
+      
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ companyName, email, password })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          errorEl.textContent = data.error || 'Login failed';
+          return;
+        }
+        
+        // Success - redirect to app
+        window.location.href = 'app.html';
+        
+      } catch (err) {
+        errorEl.textContent = 'Network error. Please try again.';
+      }
+    });
+  </script>
+</body>
+</html>
