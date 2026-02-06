@@ -766,9 +766,22 @@ app.put("/api/company", auth, adminOnly, (req, res) => {
 
 // ============ SERVE FRONTEND ============
 
-// Serve mobile app
+// Serve login page as home
 app.get("/", (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, "index.html"));
+  res.sendFile(path.join(PUBLIC_DIR, "login.html"));
+});
+
+// Serve other pages
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "login.html"));
+});
+
+app.get("/register", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "register.html"));
+});
+
+app.get("/app", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "app.html"));
 });
 
 // Serve admin portal
